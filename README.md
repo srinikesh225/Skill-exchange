@@ -147,10 +147,20 @@ Full step-by-step: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Docker
 
-`docker compose up` builds the API (with the demo dataset baked in), a Postgres service, and
-the frontend. **The Docker/compose path was written but not run on the build machine (Docker
-was not installed there), so treat it as provided-not-verified.** The SQLite quickstart above
-is the verified path.
+The **backend image is verified**: it builds and serves correctly, baking the demo dataset
+in at build time and binding to `$PORT` (exactly how Render runs it). The image is ~808 MB
+(numpy/pandas/scikit-learn) — which is also why the backend goes on Render, not a Vercel
+serverless function (250 MB limit).
+
+```bash
+docker build -t skillpulse-api ./backend
+docker run -e PORT=8000 -p 8000:8000 skillpulse-api
+```
+
+`docker compose up` additionally starts a Postgres service and the frontend; the entrypoint
+seeds Postgres on start when `DATABASE_URL` is non-SQLite. The **full compose stack
+(Postgres + frontend) has not been run end-to-end**; the backend image and the SQLite
+quickstart are the verified paths.
 
 ---
 

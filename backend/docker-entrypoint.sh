@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-# The image is built with the demo DB baked in (see Dockerfile). Regenerate only
-# if it is somehow missing (e.g. a mounted empty volume).
-if [ ! -f skillpulse.db ]; then
-  echo "No database found; generating demo dataset..."
+# Decide whether to (re)generate the dataset:
+#  - Default (SQLite): the image already has a baked skillpulse.db -> skip (fast start,
+#    used by the Render deployment).
+#  - A non-SQLite DATABASE_URL (e.g. Postgres via docker-compose): the target database is
+#    separate from the baked file, so seed it on start.
+NEED_GEN=0
+[ -f skillpulse.db ] || NEED_GEN=1
+case "${DATABASE_URL:-sqlite}" in
+  sqlite*|"") : ;;   # SQLite -> rely on the baked DB
+  *) NEED_GEN=1 ;;   # Postgres/other -> seed the external DB
+esac
+
+if [ "$NEED_GEN" = "1" ]; then
+  echo "Generating demo dataset into ${DATABASE_URL:-local SQLite file}..."
   python scripts/generate_demo_data.py
 fi
 

@@ -64,11 +64,19 @@ Each page loaded against the running stack; **console errors captured = none** o
   not "everything +300 %".
 - Demand explanation contributions sum exactly to the composite index.
 
-## Not verified on the build machine
+## Docker (verified)
 
-- **Docker / docker-compose** — Docker was not installed; compose files are provided but
-  unrun. The SQLite quickstart is the verified path.
-- **PostgreSQL** — not installed; the code is Postgres-ready via `DATABASE_URL` but was
-  exercised only on SQLite.
+- **Backend image builds and serves.** `docker build ./backend` succeeds (dataset baked in
+  at build), and the container was run with `-e PORT=9000` (simulating Render's `$PORT`):
+  `/api/health` OK, `/api/districts` returned 125 districts, `/api/meta` showed the baked
+  data (12,182 postings, 887 courses). Image size ~808 MB.
+
+## Not verified end-to-end
+
+- **Full `docker compose` stack** (Postgres + frontend together) — not run end-to-end. The
+  entrypoint now seeds Postgres when `DATABASE_URL` is non-SQLite, but only the SQLite
+  backend image path was exercised.
+- **PostgreSQL runtime** — the code is Postgres-ready via `DATABASE_URL`; the running
+  verification used SQLite.
 - **Playwright E2E** — manual headless-browser verification was done instead; Playwright
   specs are listed as future work in the roadmap.
