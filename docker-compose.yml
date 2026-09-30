@@ -35,7 +35,12 @@ services:
       - "8000:8000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        # Baked into next.config rewrites() at build time so /api/* proxies to
+        # the backend service over the compose network.
+        BACKEND_URL: http://backend:8000
     environment:
       BACKEND_URL: http://backend:8000
     depends_on:

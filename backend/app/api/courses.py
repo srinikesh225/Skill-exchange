@@ -38,8 +38,13 @@ def _course_dict(c: Course, a: CourseAlignment | None, dname: str) -> dict:
 def list_courses(
     district_id: int | None = Query(None),
     risk: str | None = Query(None, description="Filter by obsolescence risk: Low/Moderate/High"),
+    page: int | None = Query(None, ge=1, description="If set, return a paginated envelope"),
+    page_size: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
-) -> list[dict]:
+):
+    """Backward compatible: with no `page`, returns the full array (existing
+    behaviour the frontend relies on). With `page`, returns a paginated envelope
+    {items, page, page_size, total, total_pages}."""
     q = db.query(Course)
     if district_id is not None:
         q = q.filter(Course.district_id == district_id)
@@ -50,7 +55,18 @@ def list_courses(
     if risk:
         out = [c for c in out if c["obsolescence_risk"] == risk]
     out.sort(key=lambda c: (c["alignment_score"] if c["alignment_score"] is not None else 999))
-    return out
+
+    if page is None:
+        return out  # unchanged legacy shape
+    total = len(out)
+    start = (page - 1) * page_size
+    return {
+        "items": out[start:start + page_size],
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": (total + page_size - 1) // page_size,
+    }
 
 
 @router.get("/{course_id}")

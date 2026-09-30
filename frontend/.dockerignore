@@ -1,0 +1,9 @@
+# Never copy the host's (Windows) node_modules or build output into the Linux
+# image — deps are installed fresh in the deps stage. Copying them clobbers the
+# Linux binaries with Windows .bin shims and breaks `next build` (exit 127).
+node_modules
+.next
+out
+.env.local
+*.tsbuildinfo
+npm-debug.log*

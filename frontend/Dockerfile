@@ -3,12 +3,23 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm install
+# Deterministic install from the lockfile, with generous retries so a transient
+# ECONNRESET from the npm registry doesn't fail the whole image build.
+# Falls back to `npm install` if the lockfile is absent or out of sync.
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000 \
+ && npm config set fetch-timeout 600000 \
+ && (npm ci || npm install)
 
 FROM node:20-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Next.js bakes next.config rewrites() at BUILD time, so BACKEND_URL must be set
+# here (not just at runtime) for the /api/* proxy to target the right host.
+ARG BACKEND_URL=http://backend:8000
+ENV BACKEND_URL=$BACKEND_URL
 RUN npm run build
 
 FROM node:20-slim AS runner

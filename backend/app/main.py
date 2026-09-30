@@ -39,6 +39,16 @@ settings = get_settings()
 async def lifespan(_app: FastAPI):
     # Ensure tables exist; data is loaded via scripts/generate_demo_data.py.
     init_db()
+    # Warm the skill-extraction index (TF-IDF fit + sklearn import) at startup so
+    # the first /api/skills/extract request is fast. Extraction behaviour is
+    # unchanged — this only pre-builds the cached index.
+    try:
+        from app.services.skill_extraction import extract_skills
+
+        extract_skills("warmup python sql aws", use_semantic=True)
+        logger.info("Skill-extraction index warmed")
+    except Exception as exc:  # never block startup on the optional warmup
+        logger.warning("Skill-extraction warmup skipped: %s", exc)
     logger.info("SkillPulse India API started (v%s)", __version__)
     yield
 
