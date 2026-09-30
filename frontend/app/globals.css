@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Design tokens — restrained government-intelligence palette.        */
+/* Neutral ink base + a single deep-teal accent + a severity scale.   */
+/* ------------------------------------------------------------------ */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  --border: #e2e6ec;
+  --ink: #14202e;
+  --muted: #5b6b7b;
+  --subtle: #8a97a6;
+
+  --primary: #0f766e;         /* teal-700 */
+  --primary-strong: #115e59;  /* teal-800 */
+  --primary-soft: #e6f2f0;
+
+  --balanced: #2f9e6f;
+  --moderate: #c7981b;
+  --high: #dd6b20;
+  --critical: #c0392b;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d141c;
+    --surface: #131c26;
+    --surface-2: #0f1720;
+    --border: #24303d;
+    --ink: #e7edf3;
+    --muted: #9aa8b7;
+    --subtle: #6b7a8a;
+    --primary: #2dd4bf;
+    --primary-strong: #5eead4;
+    --primary-soft: #10302e;
+  }
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1, "cv05" 1;
+}
+
+/* Tabular figures for all numbers in tables/metrics. */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Focus visibility for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-card shadow-card;
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-md border border-transparent px-3.5 py-2 text-sm font-medium transition-colors;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--primary-strong);
+  }
+  .btn-outline {
+    @apply border-border bg-surface text-ink;
+  }
+  .btn-outline:hover {
+    background: var(--surface-2);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-xs font-medium;
+  }
+  .th {
+    @apply text-left text-xs font-semibold uppercase tracking-wide text-subtle px-3 py-2;
+  }
+  .td {
+    @apply px-3 py-2 text-sm border-t border-border;
+  }
+  .label {
+    @apply text-xs font-semibold uppercase tracking-wide text-subtle;
+  }
+}
+
+/* Leaflet: neutralise default chrome to match the design. */
+.leaflet-container {
+  background: var(--surface-2);
+  font-family: var(--font-sans);
+}
+/* Mute the raster basemap so coloured district markers stay the focus. */
+.map-tiles {
+  filter: grayscale(0.85) brightness(1.06) contrast(0.92);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map-tiles {
+    filter: grayscale(0.9) brightness(0.75) invert(0.92) hue-rotate(180deg);
+  }
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+.leaflet-bar a {
+  color: var(--ink);
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

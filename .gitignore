@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Database (regenerate with scripts/generate_demo_data.py)
+*.db
+*.sqlite3
+
+# Env / secrets
+.env
+.env.local
+!.env.example
+!.env.local.example
+
+# Node / Next
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Misc
+*.log
+.gstack/

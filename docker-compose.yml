@@ -1,0 +1,47 @@
+# SkillPulse India — full stack with PostgreSQL.
+# NOTE: provided for the Postgres/Docker deployment path. It was NOT run on the build
+# machine (Docker was unavailable), so treat it as provided-not-verified. The verified
+# path is the SQLite quickstart in README.md.
+#
+#   docker compose up --build
+#   frontend: http://localhost:3000   ·   API: http://localhost:8000/docs
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: skillpulse
+      POSTGRES_PASSWORD: skillpulse
+      POSTGRES_DB: skillpulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillpulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://skillpulse:skillpulse@db:5432/skillpulse
+      CORS_ORIGINS: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    environment:
+      BACKEND_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

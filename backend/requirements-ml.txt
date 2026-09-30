@@ -1,0 +1,12 @@
+# OPTIONAL machine-learning enhancement layer.
+# The core skill-extraction pipeline works WITHOUT these using a deterministic
+# alias dictionary + TF-IDF cosine similarity (scikit-learn, in requirements.txt).
+#
+# Installing these upgrades the semantic matcher to transformer embeddings.
+# They are heavier and may need extra build tooling on some platforms.
+#
+#   pip install -r requirements-ml.txt
+#
+# The code detects availability at runtime and degrades gracefully if absent.
+
+sentence-transformers==3.3.1
