@@ -54,7 +54,10 @@ def list_courses(
     out = [_course_dict(c, align.get(c.id), dnames.get(c.district_id, "")) for c in courses]
     if risk:
         out = [c for c in out if c["obsolescence_risk"] == risk]
-    out.sort(key=lambda c: (c["alignment_score"] if c["alignment_score"] is not None else 999))
+    # `id` is a deterministic tiebreaker: alignment_score has many ties, and the
+    # DB gives no guaranteed row order, so without it two pages could duplicate
+    # or skip a tied course. Does not change any computed value.
+    out.sort(key=lambda c: (c["alignment_score"] if c["alignment_score"] is not None else 999, c["id"]))
 
     if page is None:
         return out  # unchanged legacy shape

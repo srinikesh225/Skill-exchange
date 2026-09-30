@@ -12,7 +12,7 @@ from __future__ import annotations
 import random
 from datetime import date, timedelta
 
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -20,11 +20,14 @@ from app.data.districts import DISTRICTS
 from app.data.taxonomy import SKILLS
 from app.models import (
     Course,
+    CourseAlignment,
     DemandPoint,
     District,
     EmployerSignal,
     JobPosting,
+    Recommendation,
     Skill,
+    SkillMetric,
     TrainingProvider,
     course_skill,
 )
@@ -118,11 +121,28 @@ def generate(db: Session, verbose: bool = True) -> dict:
     months = _months_window(12)
 
     # --- Clean slate --------------------------------------------------------
-    for model in (course_skill, DemandPoint, EmployerSignal, JobPosting, Course,
-                  TrainingProvider):
-        db.execute(delete(model))
-    db.execute(delete(Skill))
-    db.execute(delete(District))
+    # Order matters: derived tables carry foreign keys to courses/districts/skills.
+    # PostgreSQL enforces those constraints (SQLite does not by default), so
+    # re-seeding a populated database would otherwise fail with a
+    # ForeignKeyViolation on `DELETE FROM courses`.
+    # pipeline.compute() also clears the derived tables, so this is idempotent
+    # and changes no computed value.
+    teardown = (Recommendation, CourseAlignment, SkillMetric, course_skill,
+                DemandPoint, EmployerSignal, JobPosting, Course,
+                TrainingProvider, Skill, District)
+
+    if db.bind.dialect.name == "postgresql":
+        # DELETE leaves identity sequences advanced, so every re-seed would shift
+        # all entity ids (districts 1-125 -> 126-250 -> ...), breaking deep links
+        # and diverging from SQLite. TRUNCATE ... RESTART IDENTITY keeps ids
+        # stable and reproducible across restarts.
+        names = ", ".join(
+            getattr(m, "__tablename__", None) or m.name for m in teardown
+        )
+        db.execute(text(f"TRUNCATE TABLE {names} RESTART IDENTITY CASCADE"))
+    else:
+        for model in teardown:
+            db.execute(delete(model))
     db.commit()
 
     # --- Skills -------------------------------------------------------------

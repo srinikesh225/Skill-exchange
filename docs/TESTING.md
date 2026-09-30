@@ -78,5 +78,15 @@ Each page loaded against the running stack; **console errors captured = none** o
   backend image path was exercised.
 - **PostgreSQL runtime** — the code is Postgres-ready via `DATABASE_URL`; the running
   verification used SQLite.
-- **Playwright E2E** — manual headless-browser verification was done instead; Playwright
-  specs are listed as future work in the roadmap.
+## End-to-end (Playwright)
+
+```bash
+cd frontend && npm run test:e2e      # auto-installs chromium via pretest:e2e
+```
+
+`tests/e2e/judge-journey.spec.ts` drives the full judge journey (home → districts →
+Hyderabad → "Why?" evidence → skill explorer → compare → methodology) against a running
+stack. It asserts **real numeric values** at every stage (overview counts, gap/demand/supply
+KPIs, evidence gap, suggested capacity, both compare columns, weights summing to 1.00), so an
+empty or all-zero payload fails the test. It also collects console errors, page errors, failed
+same-origin requests, any `/api/` 4xx/5xx and any same-origin 5xx. Result: **1 passed**.

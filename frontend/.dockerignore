@@ -4,6 +4,11 @@
 node_modules
 .next
 out
-.env.local
+# Exclude ALL env files — `next build` reads .env, .env.production and
+# .env.local, and none of them belong baked into an image layer.
+.env
+.env.*
 *.tsbuildinfo
 npm-debug.log*
+test-results
+playwright-report
