@@ -136,12 +136,21 @@ docker/      (compose + Dockerfiles for the PostgreSQL path)
 
 ---
 
+## Deploy (Vercel + Render)
+
+- **Frontend → Vercel** (Root Directory = `frontend`; set `BACKEND_URL` to the Render URL).
+- **Backend → Render** (Docker; the demo dataset is baked into the image, so no database
+  add-on is needed). A `render.yaml` blueprint is included.
+
+The frontend proxies `/api/*` to the backend server-to-server (no CORS setup needed).
+Full step-by-step: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ## Docker
 
-`docker compose up` builds the API (with SQLite baked in), a Postgres service, and the
-frontend. **This path was written but not run on the build machine (Docker was not
-installed there), so treat it as provided-not-verified.** The SQLite quickstart above is
-the verified path.
+`docker compose up` builds the API (with the demo dataset baked in), a Postgres service, and
+the frontend. **The Docker/compose path was written but not run on the build machine (Docker
+was not installed there), so treat it as provided-not-verified.** The SQLite quickstart above
+is the verified path.
 
 ---
 
@@ -161,4 +170,5 @@ platform analyses districts, industries, skills and courses — **never individu
 - [API reference](docs/API.md)
 - [Testing report](docs/TESTING.md)
 - [Demo script (3 minutes)](docs/DEMO_SCRIPT.md)
+- [Deployment (Vercel + Render)](docs/DEPLOYMENT.md)
 - [Limitations & roadmap](docs/LIMITATIONS_AND_ROADMAP.md)

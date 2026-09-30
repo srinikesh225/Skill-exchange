@@ -15,7 +15,11 @@ RUN pip install -r requirements.txt "psycopg[binary]==3.2.3"
 
 COPY . .
 
-# Generates demo data if the DB is empty, then serves the API.
+# Bake the reproducible demo dataset into the image so container start is fast
+# (no per-boot generation) and works on read-only/ephemeral filesystems.
+RUN python scripts/generate_demo_data.py
+
 RUN chmod +x docker-entrypoint.sh
+# Render/Fly inject $PORT; EXPOSE is informational only.
 EXPOSE 8000
 ENTRYPOINT ["./docker-entrypoint.sh"]

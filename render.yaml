@@ -1,0 +1,23 @@
+# Render Blueprint for the SkillPulse India backend (FastAPI).
+# In the Render dashboard: New +  ->  Blueprint  ->  connect this repo.
+# Render reads this file and provisions the service below.
+#
+# The demo SQLite dataset is baked into the Docker image at build time, so the
+# service needs no database add-on or persistent disk. (Move DATABASE_URL to a
+# Postgres instance later if you want mutable data.)
+
+services:
+  - type: web
+    name: skillpulse-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Optional: only needed if the frontend calls the API directly from the
+      # browser (NEXT_PUBLIC_API_BASE). With the default Vercel rewrite proxy,
+      # requests are server-to-server and CORS is not involved.
+      - key: CORS_ORIGINS
+        sync: false
